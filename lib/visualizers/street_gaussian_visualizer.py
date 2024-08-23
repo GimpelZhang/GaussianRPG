@@ -189,3 +189,91 @@ class StreetGaussianVisualizer():
             self.save_video_from_frames(self.accs_obj, 'acc_obj')
             self.save_video_from_frames(self.depths, 'depth', visualize_func=self.depth_visualize_func)
             self.save_video_from_frames(self.diffs, 'diff', visualize_func=self.diff_visualize_func)
+
+class StreetGaussianVisualizerLite():
+    def __init__(self, save_dir):
+
+        self.result_dir = save_dir
+        os.makedirs(self.result_dir, exist_ok=True)
+
+        self.save_video = cfg.render.save_video
+        self.save_image = cfg.render.save_image
+
+        self.rgbs = []
+        self.cams = []
+
+    def visualize(self, result, camera: Camera):
+        self.cams.append(camera.meta['cam'])
+        name = camera.image_name
+
+        rgb = result['rgb']
+
+        if self.save_image:
+            torchvision.utils.save_image(rgb, os.path.join(self.result_dir, f'{name}_rgb.png'))
+
+        if self.save_video:
+            rgb = (rgb.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
+            self.rgbs.append(rgb)
+
+    def visualize_novel_view(self, result, camera: Camera):
+        self.cams.append(camera.meta['cam'])
+        id = camera.id
+        rgb = result['rgb']
+        depth = result['depth']
+        depth = depth.permute(1, 2, 0).detach().cpu().numpy()  # [H, W, 1]
+        # np.save(os.path.join(self.result_dir, f'{id}_depth.npy'), depth)
+
+        if self.save_image:
+            torchvision.utils.save_image(rgb, os.path.join(self.result_dir, f'{id:06d}_rgb.png'))
+
+        if self.save_video:
+            rgb = (rgb.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
+            self.rgbs.append(rgb)
+
+    def save_video_from_frames(self, frames, name, visualize_func=None):
+        if len(frames) == 0:
+            return
+
+        unqiue_cams = sorted(list(set(self.cams)))
+        if len(unqiue_cams) == 1:
+            if visualize_func is not None:
+                frames = [visualize_func(frame) for frame in frames]
+            imageio.mimwrite(os.path.join(self.result_dir, f'{name}.mp4'), frames, fps=cfg.render.fps)
+        else:
+            concat_cameras = cfg.render.get('concat_cameras', [])
+            if len(concat_cameras) == len(unqiue_cams):
+                frames_cam_all = []
+                for cam in concat_cameras:
+                    frames_cam = [frame for frame, c in zip(frames, self.cams) if c == cam]
+                    frames_cam_all.append(frames_cam)
+
+                frames_cam_len = [len(frames_cam) for frames_cam in frames_cam_all]
+                assert len(list(set(frames_cam_len))) == 1, 'all cameras should have same number of frames'
+                num_frames = frames_cam_len[0]
+
+                frames_concat_all = []
+                for i in range(num_frames):
+                    frames_concat = []
+                    for j in range(len(concat_cameras)):
+                        frames_concat.append(frames_cam_all[j][i])
+                    frames_concat = np.concatenate(frames_concat, axis=1)
+                    frames_concat_all.append(frames_concat)
+
+                if visualize_func is not None:
+                    frames_concat_all = [visualize_func(frame) for frame in frames_concat_all]
+
+                imageio.mimwrite(os.path.join(self.result_dir, f'{name}.mp4'), frames_concat_all, fps=cfg.render.fps)
+
+            else:
+                for cam in unqiue_cams:
+                    frames_cam = [frame for frame, c in zip(frames, self.cams) if c == cam]
+
+                    if visualize_func is not None:
+                        frames_cam = [visualize_func(frame) for frame in frames_cam]
+
+                    imageio.mimwrite(os.path.join(self.result_dir, f'{name}_{str(cam)}.mp4'), frames_cam,
+                                     fps=cfg.render.fps)
+
+    def summarize(self):
+        if cfg.render.get('save_video', True):
+            self.save_video_from_frames(self.rgbs, 'color')

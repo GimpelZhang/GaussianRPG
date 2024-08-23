@@ -80,9 +80,9 @@ def render_trajectory():
 
         for idx, camera in enumerate(tqdm(cameras, desc="Rendering Trajectory")):
             result = renderer.render_all(camera, gaussians)  
-            visualizer.visualize(result, camera)
+            # visualizer.visualize(result, camera)
 
-        visualizer.summarize()
+        # visualizer.summarize()
             
 if __name__ == "__main__":
     print("Rendering " + cfg.model_path)

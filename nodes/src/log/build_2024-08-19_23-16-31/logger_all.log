@@ -1,0 +1,82 @@
+[0.171s] [34mcolcon[0m [1;30mDEBUG[0m [32mCommand line arguments: ['/home/junchuan/miniconda3/envs/street-gaussian-ros/bin/colcon', 'build'][0m
+[0.171s] [34mcolcon[0m [1;30mDEBUG[0m [32mParsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=40, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7aa50a911110>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7aa50a910850>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7aa50a910850>>)[0m
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(colcon_meta) check parameters
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) check parameters
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) check parameters
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) check parameters
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(colcon_meta) discover
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) discover
+[0.213s] [34mcolcon.colcon_core.package_discovery[0m [1;30mINFO[0m Crawling recursively for packages in '/home/junchuan/nerf/street_gaussians/nodes/src'
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ignore'
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ignore_ament_install'
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['colcon_pkg']
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'colcon_pkg'
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['colcon_meta']
+[0.213s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'colcon_meta'
+[0.214s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['ros']
+[0.214s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'ros'
+[0.239s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['cmake', 'python']
+[0.239s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'cmake'
+[0.239s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'python'
+[0.239s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extensions ['python_setup_py']
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(.) by extension 'python_setup_py'
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) by extension 'ignore'
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(build) ignored
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extensions ['ignore', 'ignore_ament_install']
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extension 'ignore'
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extension 'ignore_ament_install'
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extensions ['colcon_pkg']
+[0.240s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extension 'colcon_pkg'
+[0.241s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extensions ['colcon_meta']
+[0.241s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extension 'colcon_meta'
+[0.241s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extensions ['ros']
+[0.241s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(image_publisher) by extension 'ros'
+[0.244s] [34mcolcon.colcon_core.package_identification[0m [1;30mDEBUG[0m [32mPackage 'image_publisher' with type 'ros.ament_python' and name 'image_publisher'[0m
+[0.244s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.244s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) by extension 'ignore'
+[0.244s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(install) ignored
+[0.244s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.245s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) by extension 'ignore'
+[0.245s] [34mcolcon.colcon_core.package_identification[0m [1;30mLevel 1[0m _identify(log) ignored
+[0.245s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(recursive) using defaults
+[0.245s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) discover
+[0.245s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(ignore) using defaults
+[0.245s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) discover
+[0.245s] [34mcolcon.colcon_core.package_discovery[0m [1;30mLevel 1[0m discover_packages(path) using defaults
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'cmake_args' from command line to 'None'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'cmake_target' from command line to 'None'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'cmake_clean_cache' from command line to 'False'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'cmake_clean_first' from command line to 'False'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'cmake_force_configure' from command line to 'False'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'ament_cmake_args' from command line to 'None'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'catkin_cmake_args' from command line to 'None'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mLevel 5[0m set package 'image_publisher' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.261s] [34mcolcon.colcon_core.verb[0m [1;30mDEBUG[0m [32mBuilding package 'image_publisher' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/junchuan/nerf/street_gaussians/nodes/src/build/image_publisher', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/junchuan/nerf/street_gaussians/nodes/src/install/image_publisher', 'merge_install': False, 'path': '/home/junchuan/nerf/street_gaussians/nodes/src/image_publisher', 'symlink_install': False, 'test_result_base': None}[0m
+[0.261s] [34mcolcon.colcon_core.executor[0m [1;30mINFO[0m Executing jobs using 'parallel' executor
+[0.262s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mrun_until_complete[0m
+[0.263s] [34mcolcon.colcon_ros.task.ament_python.build[0m [1;30mINFO[0m Building ROS package in '/home/junchuan/nerf/street_gaussians/nodes/src/image_publisher' with build type 'ament_python'
+[0.263s] [34mcolcon.colcon_core.shell[0m [1;30mLevel 1[0m create_environment_hook('image_publisher', 'ament_prefix_path')
+[0.265s] [34mcolcon.colcon_core.plugin_system[0m [1;30mINFO[0m Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.265s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook '/home/junchuan/nerf/street_gaussians/nodes/src/install/image_publisher/share/image_publisher/hook/ament_prefix_path.ps1'
+[0.266s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment descriptor '/home/junchuan/nerf/street_gaussians/nodes/src/install/image_publisher/share/image_publisher/hook/ament_prefix_path.dsv'
+[0.266s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating environment hook '/home/junchuan/nerf/street_gaussians/nodes/src/install/image_publisher/share/image_publisher/hook/ament_prefix_path.sh'
+[0.267s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.267s] [34mcolcon.colcon_core.shell[0m [1;30mDEBUG[0m [32mSkip shell extension 'dsv' for command environment[0m
+[0.433s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mclosing loop[0m
+[0.433s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mloop closed[0m
+[0.433s] [34mcolcon.colcon_parallel_executor.executor.parallel[0m [1;30mDEBUG[0m [32mrun_until_complete finished with 'Command '['/home/junchuan/miniconda3/envs/street-gaussian-ros/bin/python3.11', '-c', "import sys;from setuptools.extern.packaging.specifiers import SpecifierSet;from distutils.core import run_setup;dist = run_setup(    'setup.py', script_args=('--dry-run',), stop_after='config');skip_keys = ('cmdclass', 'distclass', 'ext_modules', 'metadata');data = {    key: value for key, value in dist.__dict__.items()     if (        not key.startswith('_') and         not callable(value) and         key not in skip_keys and         key not in dist.display_option_names    )};data['metadata'] = {    k: v for k, v in dist.metadata.__dict__.items()     if k not in ('license_files', 'provides_extras')};sys.stdout.buffer.write(repr(data).encode('utf-8'))"]' returned non-zero exit status 1.'[0m
+[0.433s] [34mcolcon.colcon_core.event_reactor[0m [1;30mDEBUG[0m [32mjoining thread[0m
+[0.434s] [34mcolcon.colcon_core.event_reactor[0m [1;30mDEBUG[0m [32mjoined thread[0m
+[0.434s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/home/junchuan/nerf/street_gaussians/nodes/src/install/local_setup.ps1'
+[0.435s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix util module '/home/junchuan/nerf/street_gaussians/nodes/src/install/_local_setup_util_ps1.py'
+[0.437s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/home/junchuan/nerf/street_gaussians/nodes/src/install/setup.ps1'
+[0.438s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/home/junchuan/nerf/street_gaussians/nodes/src/install/local_setup.sh'
+[0.438s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix util module '/home/junchuan/nerf/street_gaussians/nodes/src/install/_local_setup_util_sh.py'
+[0.439s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/home/junchuan/nerf/street_gaussians/nodes/src/install/setup.sh'
+[0.440s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/home/junchuan/nerf/street_gaussians/nodes/src/install/local_setup.bash'
+[0.440s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/home/junchuan/nerf/street_gaussians/nodes/src/install/setup.bash'
+[0.441s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix script '/home/junchuan/nerf/street_gaussians/nodes/src/install/local_setup.zsh'
+[0.442s] [34mcolcon.colcon_core.shell[0m [1;30mINFO[0m Creating prefix chain script '/home/junchuan/nerf/street_gaussians/nodes/src/install/setup.zsh'

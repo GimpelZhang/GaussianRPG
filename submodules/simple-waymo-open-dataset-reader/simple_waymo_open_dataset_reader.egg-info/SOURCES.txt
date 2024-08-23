@@ -1,0 +1,12 @@
+LICENSE
+README.md
+setup.py
+simple_waymo_open_dataset_reader/__init__.py
+simple_waymo_open_dataset_reader/dataset_pb2.py
+simple_waymo_open_dataset_reader/label_pb2.py
+simple_waymo_open_dataset_reader/utils.py
+simple_waymo_open_dataset_reader.egg-info/PKG-INFO
+simple_waymo_open_dataset_reader.egg-info/SOURCES.txt
+simple_waymo_open_dataset_reader.egg-info/dependency_links.txt
+simple_waymo_open_dataset_reader.egg-info/requires.txt
+simple_waymo_open_dataset_reader.egg-info/top_level.txt

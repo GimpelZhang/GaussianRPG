@@ -1,0 +1,20 @@
+'/home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/mask'
+'/home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap'
+'/home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/train_imgs'
+
+colmap feature_extractor --ImageReader.mask_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/mask --ImageReader.camera_model SIMPLE_PINHOLE --ImageReader.single_camera_per_folder 1 --database_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/database.db --image_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/train_imgs
+
+'/home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/created/sparse/model/points3D.txt'
+
+touch /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/created/sparse/model/points3D.txt
+
+'/home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap'
+
+colmap exhaustive_matcher --database_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/database.db
+
+colmap_dir = /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/
+train_images_dir = /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/train_imgs
+model_dir = /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/created/sparse/model
+triangulated_dir = /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/triangulated/sparse/model
+
+colmap point_triangulator --database_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/database.db --image_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/train_imgs --input_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/created/sparse/model --output_path /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_031/colmap/triangulated/sparse/model --Mapper.ba_refine_focal_length 0 --Mapper.ba_refine_principal_point 0 --Mapper.max_extra_param 0 --clear_points 0 --Mapper.ba_global_max_num_iterations 30 --Mapper.filter_max_reproj_error 4 --Mapper.filter_min_tri_angle 0.5 --Mapper.tri_min_angle 0.5 --Mapper.tri_ignore_two_view_tracks 1 --Mapper.tri_complete_max_reproj_error 4 --Mapper.tri_continue_max_angle_error 4

@@ -1,0 +1,3 @@
+[console_scripts]
+image_publisher = image_publisher.image_publisher:main
+

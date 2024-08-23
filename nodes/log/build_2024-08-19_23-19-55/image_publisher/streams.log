@@ -1,0 +1,48 @@
+[0.545s] Traceback (most recent call last):
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/colcon_core/executor/__init__.py", line 91, in __call__
+    rc = await self.task(*args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/colcon_core/task/__init__.py", line 93, in __call__
+    return await task_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/colcon_ros/task/ament_python/build.py", line 102, in build
+    return await extension.build(additional_hooks=additional_hooks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/colcon_core/task/python/build.py", line 94, in build
+    available_commands = await self._get_available_commands(
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/colcon_core/task/python/build.py", line 192, in _get_available_commands
+    output = await check_output(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/colcon_core/subprocess.py", line 129, in check_output
+    assert not rc, f'Expected {args} to pass: {stderr_data}'
+AssertionError: Expected ['/home/junchuan/miniconda3/envs/street-gaussian-ros/bin/python3.11', '-W', 'ignore:setup.py install is deprecated', 'setup.py', '--help-commands'] to pass: Traceback (most recent call last):
+  File "/home/junchuan/nerf/street_gaussians/nodes/src/image_publisher/setup.py", line 5, in <module>
+    setup(
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/setuptools/__init__.py", line 145, in setup
+    return distutils.core.setup(**attrs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/distutils/core.py", line 134, in setup
+    ok = dist.parse_command_line()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/setuptools/dist.py", line 707, in parse_command_line
+    result = _Distribution.parse_command_line(self)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/distutils/dist.py", line 480, in parse_command_line
+    if self.handle_display_options(option_order):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/setuptools/dist.py", line 1092, in handle_display_options
+    return _Distribution.handle_display_options(self, option_order)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/distutils/dist.py", line 683, in handle_display_options
+    self.print_commands()
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/setuptools/dist.py", line 843, in print_commands
+    cmdclass = ep.resolve()
+               ^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/pkg_resources/__init__.py", line 2450, in resolve
+    module = __import__(self.module_name, fromlist=['__name__'], level=0)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/junchuan/miniconda3/envs/street-gaussian-ros/lib/python3.11/site-packages/setuptools/command/bdist_wininst.py", line 1, in <module>
+    import distutils.command.bdist_wininst as orig
+ModuleNotFoundError: No module named 'distutils.command.bdist_wininst'
+
