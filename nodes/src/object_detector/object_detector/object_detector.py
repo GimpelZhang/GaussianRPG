@@ -24,11 +24,9 @@ print(nerf_path)
 if nerf_path not in sys.path:
     sys.path.append(nerf_path)
 
-local_path = '/home/junchuan/nerf/street_gaussians/nodes/src/object_detector/object_detector'
-sys.path.append(local_path)
+# local_path = '/home/junchuan/nerf/street_gaussians/nodes/src/object_detector/object_detector'
+# sys.path.append(local_path)
 
-# sys.path.append('/home/junchuan/miniconda3/envs/street-gaussian/lib/python3.8/site-packages')
-#
 import torch
 import json
 from tqdm import tqdm
@@ -68,13 +66,13 @@ class ObjectDetector(Node):
         cfg.render.save_image = True
         cfg.render.save_video = False
         self.weights = weights_path
-        self.conf_thres = 0.25,  # confidence threshold
-        self.iou_thres = 0.45,  # NMS IOU threshold
-        self.max_det = 10,  # maximum detections per image
-        self.device = '',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        self.classes = None,  # filter by class: --class 0, or --class 0 2 3
-        self.agnostic_nms = False,  # class-agnostic NMS
-        self.augment = False,  # augmented inference
+        self.conf_thres = 0.25  # confidence threshold
+        self.iou_thres = 0.45  # NMS IOU threshold
+        self.max_det = 10  # maximum detections per image
+        self.device = ''  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        self.classes = None  # filter by class: --class 0, or --class 0 2 3
+        self.agnostic_nms = False  # class-agnostic NMS
+        self.augment = False  # augmented inference
 
         # run once
         t0 = time.time()
@@ -96,26 +94,29 @@ class ObjectDetector(Node):
             self.counter = len(self.cameras)
             self.cam_sample = self.cameras[self.i]
             # self.visualizer.summarize()
-            extrinsics = np.array([[0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
-            extrinsics[2, 3] = -self.cam_sample.extrinsic[0, 3]
-            intrinsics = np.array(
+            extr = np.array([[0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+            extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3])
+            # extr[2, 3] = -1.544414504251094167
+            intr = np.array(
                 [[2.083091212133253975e+03, 0.0, 800.0], [0.0, 2.083091212133253975e+03, 533], [0.0, 0.0, 1.0]])
-            self.extrinsics = extrinsics
-            self.intrinsics = intrinsics
+            self.extrinsics = extr
+            self.intrinsics = intr
             self.W = self.cam_sample.image_width
             self.H = self.cam_sample.image_height
-            self.imgsz = self.cam_sample.image_width,  # inference size (pixels)
+            self.imgsz = self.cam_sample.image_width  # inference size (pixels)
 
-            self.device = select_device('')
+            self.device = select_device(self.device)
 
             # Load model
             self.model = attempt_load(self.weights, map_location=self.device)  # load FP32 model
             self.stride = max(int(self.model.stride.max()), 32)  # model stride
-            self.names = self.model.module.names if hasattr(self.model, "module") else self.model.names  # get class names
+            self.names = self.model.module.names if hasattr(self.model,
+                                                            "module") else self.model.names  # get class names
 
             # Run inference
             if self.device.type != 'cpu':
-                self.model(torch.zeros(1, 3, self.imgsz, self.imgsz).to(self.device).type_as(next(self.model.parameters())))
+                self.model(
+                    torch.zeros(1, 3, self.imgsz, self.imgsz).to(self.device).type_as(next(self.model.parameters())))
 
     def object_point_world_position(self, u, v, w, h, p, k):
         u1 = u
@@ -178,36 +179,40 @@ class ObjectDetector(Node):
         # self.get_logger().info('Publishing: "%s"' % msg.data)
         rgb_result = result['rgb']
 
-        rgb = letterbox(rgb_result, self.imgsz, stride=self.stride, auto=True)[0]  # padded resize
-        rgb = np.ascontiguousarray(rgb)  # contiguous
+        rgb_result = (rgb_result.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
 
+        rgb = letterbox(rgb_result, self.imgsz, stride=self.stride, auto=True)[0]  # padded resize
+        rgb = rgb.transpose((2, 0, 1))[::-1]
+        # rgb = rgb.transpose((2, 0, 1))
+        rgb = np.ascontiguousarray(rgb)  # contiguous
+        rgb = torch.from_numpy(rgb).to(self.device)
         rgb = rgb.float()  # uint8 to fp16/32
         rgb /= 255.0  # 0 - 255 to 0.0 - 1.0
         if rgb.ndimension() == 3:
             rgb = rgb.unsqueeze(0)
-
+        rgb_result = rgb_result.copy()
         # Inference
-        t1 = time_synchronized()
+        # t1 = time_synchronized()
         pred = self.model(rgb, augment=self.augment)[0]
 
         # Apply NMS
-        pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms, max_det=self.max_det)
-        t2 = time_synchronized()
+        pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms,
+                                   max_det=self.max_det)
+        # t2 = time_synchronized()
 
         # Process detections 检测过程
         for i, det in enumerate(pred):  # detections per image
             s = ''
             s += '%gx%g ' % rgb.shape[2:]  # print string 图片形状 eg.640X480
-            gn = torch.tensor((self.W, self.H))[[1, 0, 1, 0]]  # normalization gain whwh
-
+            gn = torch.tensor((self.H, self.W))[[1, 0, 1, 0]]  # normalization gain whwh
             if len(det):
                 # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_coords(rgb.shape[2:], det[:, :4], (self.W, self.H)).round()
+                det[:, :4] = scale_coords(rgb.shape[2:], det[:, :4], (self.H, self.W, 3)).round()
 
                 # Print results
                 for c in det[:, -1].unique():
                     if not self.names[int(c)] in ['person', 'car', 'truck', 'bicycle', 'motorcycle', 'bus',
-                                             'traffic light', 'stop sign']:
+                                                  'traffic light', 'stop sign']:
                         continue
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {self.names[int(c)]}{'s' * (n > 1)}, "  # add to string
@@ -215,7 +220,7 @@ class ObjectDetector(Node):
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
                     if not self.names[int(cls)] in ['person', 'chair', 'car', 'truck', 'bicycle', 'motorcycle', 'bus',
-                                               'traffic light', 'stop sign']:
+                                                    'traffic light', 'stop sign']:
                         continue
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {self.names[int(c)]}{'s' * (n > 1)}, "  # add to string
@@ -223,23 +228,11 @@ class ObjectDetector(Node):
                     kuang = [int(cls), xywh[0], xywh[1], xywh[2], xywh[3]]
 
                     distance, d = self.distance(kuang)
+                    print(d)
 
-        rgb = (rgb.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
         end_time = time.perf_counter()
         print(f"1执行时间：{end_time - start_time} 秒")
 
-        msg = ROS2_Image()
-        msg.header.frame_id = 'front'
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.height = rgb.shape[0]
-        msg.width = rgb.shape[1]
-        msg.encoding = 'rgb8'
-        msg.step = msg.width * 3
-
-        # 直接使用astype转换数据类型，避免使用tolist()
-        # msg.data = rgb.reshape(1, step_size).astype(int).tolist()[0]
-        msg.data = rgb.reshape(1, msg.height * msg.step).astype(int).tolist()[0]
-        self.publisher_.publish(msg)
         self.i += 1
         if self.i < self.counter:
             self.cam_sample = self.cameras[self.i]
@@ -255,7 +248,7 @@ class ObjectDetector(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    object_detector = ObjectDetector('weights/yolov5s.pt')
+    object_detector = ObjectDetector('./src/object_detector/weights/yolov5s.pt')
 
     rclpy.spin(object_detector)
 

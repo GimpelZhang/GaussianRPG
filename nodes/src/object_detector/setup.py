@@ -5,7 +5,7 @@ package_name = 'object_detector'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=['object_detector', 'models', 'networks', 'utils', 'weights'],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='junchuan',
     maintainer_email='zjunchuan@gmail.com',
-    description='TODO: Package description',
+    description='Render images and publish the object distance using yolov5',
     license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
