@@ -4,7 +4,7 @@
   <name>image_publisher</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="junchuan@todo.todo">junchuan</maintainer>
+  <maintainer email="zjunchuan@gmail.com">junchuan</maintainer>
   <license>Apache-2.0</license>
 
   <exec_depend>rclpy</exec_depend>
