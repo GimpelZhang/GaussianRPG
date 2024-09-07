@@ -36,6 +36,44 @@ def camera_to_JSON(id, camera: Camera):
     }
     return camera_entry_before, camera_entry
 
+def camera_to_tape(id, camera: Camera):
+    serializable_array_2d = [x.tolist() for x in camera.R]
+    camera_pose = {
+        'id' : id,
+        'timestamp': camera.meta['timestamp'],
+        'rotation_matrix': serializable_array_2d,
+        'position': camera.T.tolist()
+    }
+    return camera_pose
+
+def tape_upsampling(cams_pose_list):
+    upsampling = []
+    idx = 0
+    for i in range(len(cams_pose_list) - 1):
+        current = cams_pose_list[i]
+        next_point = cams_pose_list[i + 1]
+        current['id'] = idx
+        upsampling.append(current)
+        idx = idx+1
+
+        diff = [(b - a) / 5 for a, b in zip(current['position'], next_point['position'])]
+        time_diff = (next_point['timestamp'] - current['timestamp'])/5
+        # upsampling from 10hz to 50hz:
+        for j in range(1, 5):
+            new_pos = [current['position'][k] + j * diff[k] for k in range(3)]
+            new_timestamp = current['timestamp'] + j * time_diff
+            new_id = idx
+            upsampling.append({'id': new_id,
+                               'timestamp': new_timestamp,
+                               'rotation_matrix': current['rotation_matrix'],
+                               'position': new_pos})
+            idx = idx+1
+
+    cams_pose_list[-1]['id'] = idx
+    upsampling.append(cams_pose_list[-1])
+
+    return upsampling
+
 def render_sets():
     cfg.render.save_image = True
     cfg.render.save_video = False
@@ -84,11 +122,11 @@ def render_sets():
         print('average rendering time: ', sum(times[1:]) / len(times[1:]))
                 
 def render_trajectory():
-    cfg.render.save_image = False
-    cfg.render.save_video = True
+    # cfg.render.save_image = False
+    # cfg.render.save_video = True
 
-    # cfg.render.save_image = True
-    # cfg.render.save_video = False
+    cfg.render.save_image = False
+    cfg.render.save_video = False
     
     with torch.no_grad():
         dataset = Dataset()        
@@ -108,8 +146,10 @@ def render_trajectory():
         len_cameras = len(cameras)
         json_cams_before = []
         json_cams = []
+        cams_tape_orig = []
 
-        for idx in range(len_cameras+5):
+        # for idx in range(90, len_cameras+5):
+        for idx in range(len_cameras):
             if idx < len_cameras:
                 cam_sample = cameras[idx]
             else:
@@ -163,12 +203,14 @@ def render_trajectory():
             # print(" direction_vector: ", direction_vector)
             print(" camera.T: ", cam_sample.T)
             # print(" new T: ", new_translation)
+            print(" camera.timestamp: ", cam_sample.meta['timestamp'])
 
             result = renderer.render_all(cam_sample, gaussians)
             visualizer.visualize(result, cam_sample)
             _before, _cam = camera_to_JSON(idx, cam_sample)
             json_cams_before.append(_before)
             json_cams.append(_cam)
+            cams_tape_orig.append(camera_to_tape(idx, cam_sample))
 
         json_cams_output_before = {"frames": json_cams_before}
         with open(os.path.join(visualizer.result_dir, "cameras_before.json"), 'w') as file:
@@ -176,6 +218,11 @@ def render_trajectory():
         json_cams_output = {"frames": json_cams}
         with open(os.path.join(visualizer.result_dir, "cameras.json"), 'w') as file:
             json.dump(json_cams_output, file)
+
+        cams_tape = tape_upsampling(cams_tape_orig)
+        cams_tape_output = {"frames": cams_tape}
+        with open(os.path.join(visualizer.result_dir, "cams_tape.json"), 'w') as file:
+            json.dump(cams_tape_output, file)
         # for idx, camera in enumerate(tqdm(cameras, desc="Rendering Trajectory")):
         #     result = renderer.render_all(camera, gaussians)
         #     visualizer.visualize(result, camera)

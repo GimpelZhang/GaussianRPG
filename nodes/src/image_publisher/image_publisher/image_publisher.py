@@ -18,8 +18,11 @@ from std_msgs.msg import String
 import sys
 import os
 from sensor_msgs.msg import Image as ROS2_Image
+from geometry_msgs.msg import PoseWithCovarianceStamped
 
-nerf_path = '/home/junchuan/nerf/street_gaussians'
+from scipy.spatial.transform import Rotation
+
+nerf_path = '../'
 print(nerf_path)
 if nerf_path not in sys.path:
     sys.path.append(nerf_path)
@@ -49,6 +52,14 @@ class ImagePublisher(Node):
         self.publisher_ = self.create_publisher(ROS2_Image, 'front_image', 10)
         timer_period = 0.05  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
+
+        self.subscription = self.create_subscription(
+            PoseWithCovarianceStamped,
+            'cam_pose',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+
         self.i = 0
         cfg.mode = 'trajectory'
         cfg.render.save_image = True
@@ -69,8 +80,39 @@ class ImagePublisher(Node):
             self.cameras = train_cameras + test_cameras
             self.cameras = list(sorted(self.cameras, key=lambda x: x.id))
             self.counter = len(self.cameras)
-            self.cam_sample = self.cameras[self.i]
+            self.cam_sample = self.cameras[0]
+            self.cam_orig = self.cameras[0] # use the first camera as the original camera
             # self.visualizer.summarize()
+
+    def listener_callback(self, msg):
+        quaternion = np.array([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z,
+                               msg.pose.pose.orientation.w])
+        R = Rotation.from_quat(quaternion).as_matrix()
+        T = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
+        K_array = None
+        if self.cam_orig.K.is_cuda:
+            K = self.cam_orig.K.cpu()
+            K_array = K.detach().numpy()
+        cam_sample = Camera(
+            id=self.cam_orig.id,
+            R=R,
+            T=T,
+            FoVx=self.cam_orig.FoVx,
+            FoVy=self.cam_orig.FoVy,
+            K=K_array,
+            image=self.cam_orig.original_image,
+            image_name=self.cam_orig.image_name,
+            metadata=self.cam_orig.meta
+        )
+        cam_sample.ego_pose = self.cam_orig.ego_pose
+        cam_sample.extrinsic = self.cam_orig.extrinsic
+        cam_sample.id = self.i
+        cam_sample.meta['frame'] = self.i
+        cam_sample.meta['frame_idx'] = self.i
+        cam_sample.meta['timestamp'] = float(msg.header.stamp.sec) + float(msg.header.stamp.nanosec)/1e9
+        cam_sample.image_name = '000%s_0' % cam_sample.meta['frame']
+
+        self.cam_sample = cam_sample
 
     def timer_callback(self):
         start_time = time.perf_counter()
@@ -98,10 +140,10 @@ class ImagePublisher(Node):
         msg.data = rgb.reshape(1, msg.height * msg.step).astype(int).tolist()[0]
         self.publisher_.publish(msg)
         self.i += 1
-        if self.i < self.counter:
-            self.cam_sample = self.cameras[self.i]
-        else:
-            self.cam_sample = self.cameras[-1]
+        # if self.i < self.counter:
+        #     self.cam_sample = self.cameras[self.i]
+        # else:
+        #     self.cam_sample = self.cameras[-1]
         end_time = time.perf_counter()
         print(f"2执行时间：{end_time - start_time} 秒")
 
