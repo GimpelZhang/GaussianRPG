@@ -19,13 +19,10 @@ import sys
 import os
 from sensor_msgs.msg import Image as ROS2_Image
 
-nerf_path = '/home/junchuan/nerf/street_gaussians'
+nerf_path = '../'
 print(nerf_path)
 if nerf_path not in sys.path:
     sys.path.append(nerf_path)
-
-# local_path = '/home/junchuan/nerf/street_gaussians/nodes/src/object_detector/object_detector'
-# sys.path.append(local_path)
 
 import torch
 import json
