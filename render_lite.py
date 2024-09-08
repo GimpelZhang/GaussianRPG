@@ -221,6 +221,8 @@ def render_trajectory():
 
         cams_tape = tape_upsampling(cams_tape_orig)
         cams_tape_output = {"frames": cams_tape}
+        cams_tape_output["image_freq"] = 10
+        cams_tape_output["dynamic_freq"] = 50
         with open(os.path.join(visualizer.result_dir, "cams_tape.json"), 'w') as file:
             json.dump(cams_tape_output, file)
         # for idx, camera in enumerate(tqdm(cameras, desc="Rendering Trajectory")):
