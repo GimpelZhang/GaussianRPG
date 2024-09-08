@@ -49,6 +49,7 @@ class ImagePublisher(Node):
 
     def __init__(self):
         super().__init__('image_publisher')
+        print("argv len: ", len(sys.argv))
         self.publisher_ = self.create_publisher(ROS2_Image, 'front_image', 10)
         self.publisher_flag = self.create_publisher(Float64, 'image_timestamp', 10)
         timer_period = 0.1  # seconds

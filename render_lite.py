@@ -38,11 +38,14 @@ def camera_to_JSON(id, camera: Camera):
 
 def camera_to_tape(id, camera: Camera):
     serializable_array_2d = [x.tolist() for x in camera.R]
+    ego_pose = camera.ego_pose.detach().cpu().numpy().astype(np.float32)
+    ego_pose_2d = [x.tolist() for x in ego_pose]
     camera_pose = {
         'id' : id,
         'timestamp': camera.meta['timestamp'],
         'rotation_matrix': serializable_array_2d,
-        'position': camera.T.tolist()
+        'position': camera.T.tolist(),
+        'ego_pose': ego_pose_2d
     }
     return camera_pose
 
@@ -58,15 +61,24 @@ def tape_upsampling(cams_pose_list):
 
         diff = [(b - a) / 5 for a, b in zip(current['position'], next_point['position'])]
         time_diff = (next_point['timestamp'] - current['timestamp'])/5
+        diff_ego_x = (next_point['ego_pose'][0][3] - current['ego_pose'][0][3])/5
+        diff_ego_y = (next_point['ego_pose'][1][3] - current['ego_pose'][1][3])/5
+        diff_ego_z = (next_point['ego_pose'][2][3] - current['ego_pose'][2][3])/5
+        print(diff_ego_x, diff_ego_y,diff_ego_z)
         # upsampling from 10hz to 50hz:
         for j in range(1, 5):
             new_pos = [current['position'][k] + j * diff[k] for k in range(3)]
             new_timestamp = current['timestamp'] + j * time_diff
             new_id = idx
+            new_ego_pos = copy.deepcopy(current['ego_pose'])
+            new_ego_pos[0][3] = current['ego_pose'][0][3] + j * diff_ego_x
+            new_ego_pos[1][3] = current['ego_pose'][1][3] + j * diff_ego_y
+            new_ego_pos[2][3] = current['ego_pose'][2][3] + j * diff_ego_z
             upsampling.append({'id': new_id,
                                'timestamp': new_timestamp,
                                'rotation_matrix': current['rotation_matrix'],
-                               'position': new_pos})
+                               'position': new_pos,
+                               'ego_pose': new_ego_pos})
             idx = idx+1
 
     cams_pose_list[-1]['id'] = idx
@@ -148,7 +160,7 @@ def render_trajectory():
         json_cams = []
         cams_tape_orig = []
 
-        # for idx in range(90, len_cameras+5):
+        # for idx in range(90, len_cameras+10):
         for idx in range(len_cameras):
             if idx < len_cameras:
                 cam_sample = cameras[idx]
@@ -163,7 +175,8 @@ def render_trajectory():
                 # # 获取欧拉角
                 # euler_angles = r.as_euler('xyz', degrees=True)
                 # print(" camera xyz angle: ", euler_angles)
-                x = 0.5  # 举例
+                # x = 0.5  # 举例
+                x = 0.0  # 举例
                 # 从 T1 的旋转矩阵中提取前进方向的单位向量，这里是 z 轴负方向
                 direction_vector = -Rt[:, 0]  # 假设物体沿 z 轴负方向前进
 
@@ -193,7 +206,7 @@ def render_trajectory():
                 cam_sample.id = cam_orig.id + fake_idx
                 cam_sample.meta['frame'] = cam_orig.meta['frame'] + fake_idx
                 cam_sample.meta['frame_idx'] = cam_orig.meta['frame_idx'] + fake_idx
-                # cam_sample.meta['timestamp'] = cam_orig.meta['timestamp'] - fake_idx*0.1
+                cam_sample.meta['timestamp'] = cam_orig.meta['timestamp'] - fake_idx*0.1
                 cam_sample.image_name = '000%s_0' % cam_sample.meta['frame']
 
             print("#### idx: ", idx)
