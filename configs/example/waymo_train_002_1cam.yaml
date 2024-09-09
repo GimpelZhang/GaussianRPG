@@ -2,6 +2,8 @@ task: waymo_full_exp
 source_path: /home/junchuan/nerf/street_gaussians/data/waymo/training/002
 exp_name: waymo_train_002_1cam
 traj_file_path: /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_002_1cam/trajectory/ours_50000/cams_tape.json
+separate_perception: false
+yolov5_weights_path: /home/junchuan/nerf/street_gaussians/weights/yolov5s.pt
 
 data:
   split_test: -1
