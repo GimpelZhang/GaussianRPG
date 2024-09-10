@@ -224,8 +224,10 @@ class MainFrame(Node):
                 if velocity_step < 0:
                     velocity_step = 0
                 print("velocity_step: ", velocity_step)
-                cam_rot = copy.deepcopy(self.last_pose_dict['rotation_matrix'])
-                cam_trans = copy.deepcopy(self.last_pose_dict['position'])
+                # cam_rot = copy.deepcopy(self.last_pose_dict['rotation_matrix'])
+                # cam_trans = copy.deepcopy(self.last_pose_dict['position'])
+                cam_rot = self.last_pose_dict['rotation_matrix']
+                cam_trans = self.last_pose_dict['position']
                 Rt = np.array(cam_rot).transpose()
                 # for cam: -z;
                 cam_direction_vector = -Rt[:, 0]
@@ -261,9 +263,10 @@ class MainFrame(Node):
                                                    - np.array(self.last_pose_dict['position']))/self.timer_period
             self.last_pose_dict = pose
             print("velocity: ", self.forward_velocity)
-            # if self.idx > 20:
-            #     self.controller_activated = True
-            #     print("Brake true.")
+            if self.idx > 270:
+                self.controller_activated = True
+                self.command_brake = -11.0
+                print("Brake true.")
             if self.sync_iter >= self.sync_iter_times:
                 self.sync_iter = 0
                 self.sync_lock = True
@@ -422,7 +425,7 @@ class MainFrame(Node):
         if np.abs(msg.twist.linear.x) > 0:
             self.controller_activated = True
             self.command_brake = msg.twist.linear.x
-            self.get_logger().info('Brake pressed: ', self.command_brake)
+            self.get_logger().info('Brake pressed: "%s"' % self.command_brake)
 
     def final_call(self):
         # self.visualizer.summarize()
