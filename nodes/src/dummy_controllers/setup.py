@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'aeb_controller = dummy_controllers.AEB_controller:main'
+            'aeb_controller = dummy_controllers.AEB_controller:main',
+            'object_detector = dummy_controllers.object_detector:main'
         ],
     },
 )

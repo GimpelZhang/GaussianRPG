@@ -14,14 +14,8 @@
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Float64
-import sys
-import os
-from sensor_msgs.msg import Image as ROS2_Image
-from geometry_msgs.msg import PoseWithCovarianceStamped, TwistStamped, PoseArray, Pose
 
-from scipy.spatial.transform import Rotation
-import numpy as np
+from geometry_msgs.msg import PoseWithCovarianceStamped, TwistStamped, PoseArray
 
 class Controller(Node):
 
@@ -69,9 +63,9 @@ class Controller(Node):
         command_msg.twist.angular.z = 0.0
 
         if self.cipv_lon_dist < 24:
-            if self.lon_velocity > 10:
-                command_msg.twist.linear.x = -11.0  # m/s^2
-            elif self.lon_velocity > 4:
+            if self.lon_velocity > 2:
+                command_msg.twist.linear.x = -13.5  # m/s^2
+            elif self.lon_velocity > 1:
                 command_msg.twist.linear.x = -10.0
             elif self.lon_velocity > 0.001:
                 command_msg.twist.linear.x = -8.0

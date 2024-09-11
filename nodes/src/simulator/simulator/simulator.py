@@ -84,10 +84,13 @@ class MainFrame(Node):
                 self.traj = json.load(file)
         except FileNotFoundError:
             self.get_logger().error('Traj file not found.')
+            return
         except json.JSONDecodeError:
             self.get_logger().error('Parsing traj file failed')
+            return
         except Exception as e:
             self.get_logger().error(f"Unkown error：{e}")
+            return
 
         self.traj_length = len(self.traj['frames'])
         self.sync_iter_times = int(self.traj['dynamic_freq'] / self.traj['image_freq'])
@@ -263,10 +266,10 @@ class MainFrame(Node):
                                                    - np.array(self.last_pose_dict['position']))/self.timer_period
             self.last_pose_dict = pose
             print("velocity: ", self.forward_velocity)
-            if self.idx > 270:
-                self.controller_activated = True
-                self.command_brake = -11.0
-                print("Brake true.")
+            # if self.idx > 280:
+            #     self.controller_activated = True
+            #     self.command_brake = -11.0
+            #     print("Brake true.")
             if self.sync_iter >= self.sync_iter_times:
                 self.sync_iter = 0
                 self.sync_lock = True
