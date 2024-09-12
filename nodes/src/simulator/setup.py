@@ -20,7 +20,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simulator = simulator.simulator:main'
+            'simulator = simulator.simulator:main',
+            'ground_truth = simulator.groundtruth:main',
+            'evaluation = simulator.evaluation:main'
         ],
     },
 )

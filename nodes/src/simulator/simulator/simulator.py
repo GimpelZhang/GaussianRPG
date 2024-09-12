@@ -134,7 +134,7 @@ class MainFrame(Node):
                 self.augment = False  # augmented inference
                 extr = np.array(
                     [[0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
-                extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3])
+                extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3]) # ego to cipv
                 self.cam_height = float(self.cam_sample.extrinsic[2, 3])
                 # extr[2, 3] = -1.544414504251094167
                 intr = np.array(
@@ -258,6 +258,8 @@ class MainFrame(Node):
             msg.pose.pose.orientation.y = quat[1]
             msg.pose.pose.orientation.z = quat[2]
             msg.pose.pose.orientation.w = quat[3]
+
+            msg.pose.covariance[0] = float(self.idx) # pass the idx info to the ground truth provider.
 
             self.idx = self.idx + 1
             self.sync_iter = self.sync_iter + 1
