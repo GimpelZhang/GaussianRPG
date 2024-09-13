@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'simulator'
+package_name = 'dummy_controllers'
 
 setup(
     name=package_name,
@@ -15,14 +15,13 @@ setup(
     zip_safe=True,
     maintainer='junchuan',
     maintainer_email='zjunchuan@gmail.com',
-    description='The simulator main frame',
+    description='A dummy AEB controller with simple logic',
     license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simulator = simulator.simulator:main',
-            'ground_truth = simulator.groundtruth:main',
-            'evaluation = simulator.evaluation:main'
+            'aeb_controller = dummy_controllers.AEB_controller:main',
+            'object_detector = dummy_controllers.object_detector:main'
         ],
     },
 )

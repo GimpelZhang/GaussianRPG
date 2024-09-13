@@ -84,10 +84,13 @@ class MainFrame(Node):
                 self.traj = json.load(file)
         except FileNotFoundError:
             self.get_logger().error('Traj file not found.')
+            return
         except json.JSONDecodeError:
             self.get_logger().error('Parsing traj file failed')
+            return
         except Exception as e:
             self.get_logger().error(f"Unkown error：{e}")
+            return
 
         self.traj_length = len(self.traj['frames'])
         self.sync_iter_times = int(self.traj['dynamic_freq'] / self.traj['image_freq'])
@@ -131,7 +134,7 @@ class MainFrame(Node):
                 self.augment = False  # augmented inference
                 extr = np.array(
                     [[0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
-                extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3])
+                extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3]) # ego to cipv
                 self.cam_height = float(self.cam_sample.extrinsic[2, 3])
                 # extr[2, 3] = -1.544414504251094167
                 intr = np.array(
@@ -224,8 +227,10 @@ class MainFrame(Node):
                 if velocity_step < 0:
                     velocity_step = 0
                 print("velocity_step: ", velocity_step)
-                cam_rot = copy.deepcopy(self.last_pose_dict['rotation_matrix'])
-                cam_trans = copy.deepcopy(self.last_pose_dict['position'])
+                # cam_rot = copy.deepcopy(self.last_pose_dict['rotation_matrix'])
+                # cam_trans = copy.deepcopy(self.last_pose_dict['position'])
+                cam_rot = self.last_pose_dict['rotation_matrix']
+                cam_trans = self.last_pose_dict['position']
                 Rt = np.array(cam_rot).transpose()
                 # for cam: -z;
                 cam_direction_vector = -Rt[:, 0]
@@ -254,6 +259,8 @@ class MainFrame(Node):
             msg.pose.pose.orientation.z = quat[2]
             msg.pose.pose.orientation.w = quat[3]
 
+            msg.pose.covariance[0] = float(self.idx) # pass the idx info to the ground truth provider.
+
             self.idx = self.idx + 1
             self.sync_iter = self.sync_iter + 1
             self.publisher_pose.publish(msg)
@@ -261,8 +268,9 @@ class MainFrame(Node):
                                                    - np.array(self.last_pose_dict['position']))/self.timer_period
             self.last_pose_dict = pose
             print("velocity: ", self.forward_velocity)
-            # if self.idx > 20:
+            # if self.idx > 280:
             #     self.controller_activated = True
+            #     self.command_brake = -11.0
             #     print("Brake true.")
             if self.sync_iter >= self.sync_iter_times:
                 self.sync_iter = 0
@@ -422,7 +430,7 @@ class MainFrame(Node):
         if np.abs(msg.twist.linear.x) > 0:
             self.controller_activated = True
             self.command_brake = msg.twist.linear.x
-            self.get_logger().info('Brake pressed: ', self.command_brake)
+            self.get_logger().info('Brake pressed: "%s"' % self.command_brake)
 
     def final_call(self):
         # self.visualizer.summarize()
