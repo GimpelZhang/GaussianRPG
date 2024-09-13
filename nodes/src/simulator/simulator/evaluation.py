@@ -27,33 +27,14 @@ import numpy as np
 class Evaluation(Node):
 
     def __init__(self):
-        super().__init__('ground_truth')
-        self.traj_file_path = ''
-        self.controller_activated = False
-        self.idx = 0
-        self.timestamp = 0.0
-        if len(sys.argv) < 2:
-            self.get_logger().error('arg: traj_path')
-        else:
-            self.traj_file_path = sys.argv[1]
-
-        try:
-            with open(self.traj_file_path, 'r', encoding='utf-8') as file:
-                self.traj = json.load(file)
-
-        except FileNotFoundError:
-            self.get_logger().error('Traj file not found.')
-        except json.JSONDecodeError:
-            self.get_logger().error('Parsing traj file failed')
-        except Exception as e:
-            self.get_logger().error(f"Unkown error：{e}")
-
-        self.traj_length = len(self.traj['frames'])
-        self.sync_iter_times = int(self.traj['dynamic_freq'] / self.traj['image_freq'])
-        self.sync_iter = 0
-        self.sync_lock = False
-        self.image_last_stamp = -0.1
-        self.last_pose_msg = PoseWithCovarianceStamped()
+        super().__init__('evaluation')
+        self.simulation_time = 20.0
+        self.collision_threshold = 2.0
+        if len(sys.argv) > 2:
+            self.simulation_time = float(sys.argv[1])
+            self.collision_threshold = float(sys.argv[2])
+        elif len(sys.argv) > 1:
+            self.simulation_time = float(sys.argv[1])
 
         self.sub_cam_pose = self.create_subscription(
             PoseWithCovarianceStamped,
@@ -69,13 +50,15 @@ class Evaluation(Node):
             10)
         self.sub_distance_gt  # prevent unused variable warning
 
-        print(self.traj_file_path)
-
     def cam_pose_callback(self, msg):
-        pass
+        if msg.header.stamp.sec > self.simulation_time:
+            self.get_logger().info('Succeeded. The simulation ends at: "%s" s' % self.simulation_time)
+            raise SystemExit()
 
     def distance_gt_callback(self, msg):
-        pass
+        if msg.data < self.collision_threshold:
+            self.get_logger().error('Failed. Collision at: "%s" m' % msg.data)
+            raise SystemExit()
 
     def final_call(self):
         pass
@@ -84,12 +67,10 @@ def main(args=None):
     rclpy.init(args=args)
 
     evaluation = Evaluation()
-
-    rclpy.spin(evaluation)
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    evaluation.final_call()
-    evaluation.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(evaluation)
+    except SystemExit:
+        evaluation.get_logger().info(' **Simulation done.** ')
+        evaluation.final_call()
+        evaluation.destroy_node()
+        rclpy.shutdown()
