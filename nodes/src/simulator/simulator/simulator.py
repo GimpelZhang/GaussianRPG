@@ -23,7 +23,6 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, TwistStamped, PoseArray
 from scipy.spatial.transform import Rotation
 
 nerf_path = '../'
-print(nerf_path)
 if nerf_path not in sys.path:
     sys.path.append(nerf_path)
 
@@ -144,7 +143,7 @@ class MainFrame(Node):
                 self.W = self.cam_sample.image_width
                 self.H = self.cam_sample.image_height
                 self.imgsz = self.cam_sample.image_width  # inference size (pixels)
-                print("self.imgsz: ", self.imgsz)
+                # print("self.imgsz: ", self.imgsz)
 
                 self.device = select_device(self.device)
 
@@ -165,7 +164,7 @@ class MainFrame(Node):
     def object_point_world_position(self, u, v, w, h, p, k):
         u1 = u
         v1 = v + h / 2
-        print('关键点坐标：', u1, v1)
+        # print('关键点坐标：', u1, v1)
 
         fx = k[0, 0]
         fy = k[1, 1]
@@ -173,40 +172,41 @@ class MainFrame(Node):
         angle_a = 0
         angle_b = math.atan((v1 - self.H / 2) / fy)
         angle_c = angle_b + angle_a
-        print('angle_b', angle_b)
+        # print('angle_b', angle_b)
 
         depth = (H / np.sin(angle_c)) * math.cos(angle_b)
-        print('depth', depth)
+        # print('depth', depth)
 
         k_inv = np.linalg.inv(k)
         p_inv = np.linalg.inv(p)
         # print(p_inv)
         point_c = np.array([u1, v1, 1])
         point_c = np.transpose(point_c)
-        print('point_c', point_c)
-        print('k_inv', k_inv)
+        # print('point_c', point_c)
+        # print('k_inv', k_inv)
         c_position = np.matmul(k_inv, depth * point_c)
         # print('c_position', c_position)
         c_position = np.append(c_position, 1)
         c_position = np.transpose(c_position)
         c_position = np.matmul(p_inv, c_position)
         d1 = np.array((c_position[0], -c_position[1]), dtype=float)
-        print('c_position', c_position)
+        # print('c_position', c_position)
         # d1 = np.array((c_position[2], -c_position[0]), dtype=float)
         return d1
 
-    def distance(self, kuang, xw=5, yw=0.1):
-        print('=' * 50)
-        print('开始测距')
+    def distance(self, bbox, xw=5, yw=0.1):
+        # print('=' * 50)
+        # print('开始测距')
+        d1 = np.array((0.0, 0.0), dtype=float)
         p = self.extrinsics
         k = self.intrinsics
-        if len(kuang):
+        if len(bbox):
             obj_position = []
-            u, v, w, h = kuang[1] * self.W, kuang[2] * self.H, kuang[3] * self.W, kuang[4] * self.H
-            print('目标框', u, v, w, h)
+            u, v, w, h = bbox[1] * self.W, bbox[2] * self.H, bbox[3] * self.W, bbox[4] * self.H
+            # print('目标框', u, v, w, h)
             d1 = self.object_point_world_position(u, v, w, h, p, k)
         distance = 0
-        print('距离', d1)
+        # print('距离', d1)
         if d1[0] <= 0:
             d1[:] = 0
         else:
@@ -226,7 +226,7 @@ class MainFrame(Node):
                 velocity_step = self.forward_velocity + self.command_brake * self.timer_period
                 if velocity_step < 0:
                     velocity_step = 0
-                print("velocity_step: ", velocity_step)
+                # print("velocity_step: ", velocity_step)
                 # cam_rot = copy.deepcopy(self.last_pose_dict['rotation_matrix'])
                 # cam_trans = copy.deepcopy(self.last_pose_dict['position'])
                 cam_rot = self.last_pose_dict['rotation_matrix']
@@ -241,7 +241,7 @@ class MainFrame(Node):
                 pose['rotation_matrix'] = cam_rot
                 pose['position'] = update_cam.tolist()
 
-            print("car dynamic: ", self.timestamp)
+            # print("car dynamic: ", self.timestamp)
             msg = PoseWithCovarianceStamped()
             msg.header.frame_id = 'map'
             msg.header.stamp.sec = int(self.timestamp)
@@ -267,7 +267,8 @@ class MainFrame(Node):
             self.forward_velocity = np.linalg.norm(np.array(pose['position'])
                                                    - np.array(self.last_pose_dict['position']))/self.timer_period
             self.last_pose_dict = pose
-            print("velocity: ", self.forward_velocity)
+            # print("velocity: ", self.forward_velocity)
+            # # for debug:
             # if self.idx > 280:
             #     self.controller_activated = True
             #     self.command_brake = -11.0
@@ -305,17 +306,12 @@ class MainFrame(Node):
                 self.render()
 
     def render(self):
-        start_time = time.perf_counter()
-        print('image_publisher: ', self.cam_sample.meta['timestamp'])
+        # start_time = time.perf_counter()
+        # print('image_publisher: ', self.cam_sample.meta['timestamp'])
         result = self.renderer.render_all(self.cam_sample, self.gaussians)
-        # self.visualizer.visualize(result, self.cam_sample)
-        # msg = String()
-        # msg.data = 'Hello World: %d' % self.i
-        # self.publisher_.publish(msg)
-        # self.get_logger().info('Publishing: "%s"' % msg.data)
         rgb_result = result['rgb']
         rgb_result = (rgb_result.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
-        end_time = time.perf_counter()
+        # end_time = time.perf_counter()
         # print(f"1执行时间：{end_time - start_time} 秒")
         if self.separate_perception:
             msg = ROS2_Image()
@@ -329,16 +325,11 @@ class MainFrame(Node):
             msg.data = rgb_result.reshape(1, msg.height * msg.step).astype(int).tolist()[0]
             self.publisher_image.publish(msg)
 
-            # if self.i < self.counter:
-            #     self.cam_sample = self.cameras[self.i]
-            # else:
-            #     self.cam_sample = self.cameras[-1]
-            end_time = time.perf_counter()
+            # end_time = time.perf_counter()
             # print(f"2执行时间：{end_time - start_time} 秒")
         else:
             rgb = letterbox(rgb_result, self.imgsz, stride=self.stride, auto=True)[0]  # padded resize
             rgb = rgb.transpose((2, 0, 1))[::-1]
-            # rgb = rgb.transpose((2, 0, 1))
             rgb = np.ascontiguousarray(rgb)  # contiguous
             rgb = torch.from_numpy(rgb).to(self.device)
             rgb = rgb.float()  # uint8 to fp16/32
@@ -390,10 +381,9 @@ class MainFrame(Node):
                         n = (det[:, -1] == c).sum()  # detections per class
                         s += f"{n} {self.names[int(c)]}{'s' * (n > 1)}, "  # add to string
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()
-                        kuang = [int(cls), xywh[0], xywh[1], xywh[2], xywh[3]]
+                        bbox = [int(cls), xywh[0], xywh[1], xywh[2], xywh[3]]
 
-                        distance, d = self.distance(kuang)
-                        print(d)
+                        distance, d = self.distance(bbox)
                         if d[0] != 0 or d[1] != 0:
                             object_pose = Pose()
                             object_pose.position.x = d[0]
@@ -421,8 +411,8 @@ class MainFrame(Node):
                 # cv2.imwrite(save_path, rgb_result)
 
             self.publisher_objects.publish(msg)
-            end_time = time.perf_counter()
-            print(f"1执行时间：{end_time - start_time} 秒")
+            # end_time = time.perf_counter()
+            # print(f"1执行时间：{end_time - start_time} 秒")
 
         self.sync_lock = False
 

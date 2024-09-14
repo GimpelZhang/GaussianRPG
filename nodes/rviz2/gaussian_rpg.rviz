@@ -63,18 +63,18 @@ Visualization Manager:
         Value: /front_image
       Value: true
     - Alpha: 1
-      Arrow Length: 0.800000011920929
+      Arrow Length: 2.799999952316284
       Axes Length: 0.30000001192092896
       Axes Radius: 0.009999999776482582
       Class: rviz_default_plugins/PoseArray
       Color: 255; 25; 0
       Enabled: true
-      Head Length: 0.07000000029802322
-      Head Radius: 0.029999999329447746
+      Head Length: 1.7000000476837158
+      Head Radius: 1.7000000476837158
       Name: PoseArray
-      Shaft Length: 0.23000000417232513
-      Shaft Radius: 0.009999999776482582
-      Shape: Arrow (Flat)
+      Shaft Length: 3.9000000953674316
+      Shaft Radius: 0.800000011920929
+      Shape: Arrow (3D)
       Topic:
         Depth: 5
         Durability Policy: Volatile

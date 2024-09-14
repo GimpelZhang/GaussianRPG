@@ -51,7 +51,10 @@ class Controller(Node):
         if len(cipv_candidate)>0:
             self.cipv_lon_dist = min(cipv_candidate)
 
-        print("cipv: ", self.cipv_lon_dist)
+        # print("cipv: ", self.cipv_lon_dist)
+        time_stamp = float(msg.header.stamp.sec) + float(msg.header.stamp.nanosec) / 1e9
+        self.get_logger().info('timestamp: "%s"' % time_stamp)
+        self.get_logger().info('cipv: "%s"' % self.cipv_lon_dist)
 
         command_msg = TwistStamped()
         command_msg.header = msg.header
@@ -72,7 +75,8 @@ class Controller(Node):
             else:
                 command_msg.twist.linear.x = 0.0
 
-        print("command: ", command_msg.twist.linear.x)
+        # print("command: ", command_msg.twist.linear.x)
+        self.get_logger().info('command output: "%s"' % command_msg.twist.linear.x)
         self.publisher_command.publish(command_msg)
 
 

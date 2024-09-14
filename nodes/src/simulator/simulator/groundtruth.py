@@ -101,8 +101,11 @@ class GroundTruth(Node):
                 track_info = list(self.tracklets_ls.values())[-1]
             distance_msg = Float64()
             distance_msg.data = ego_pose[0] + track_info[0] - (-msg.pose.pose.position.z)
-            print("idx: ", idx)
-            print(" cam to cipv: ", distance_msg.data)
+            # print("idx: ", idx)
+            # print(" cam to cipv: ", distance_msg.data)
+            time_stamp = float(msg.header.stamp.sec) + float(msg.header.stamp.nanosec) / 1e9
+            self.get_logger().info('timestamp: "%s"' % time_stamp)
+            self.get_logger().info('GT cam to cipv: "%s"' % distance_msg.data)
             self.publisher_distance.publish(distance_msg)
 
 
