@@ -97,8 +97,8 @@ class GroundTruth(Node):
                 track_info_idx = idx // self.sync_iter_times + self.start_frame
                 track_info = self.tracklets_ls[track_info_idx]
             else:
-                ego_pose = self.traj_ls[-1]
-                track_info = self.tracklets_ls[-1]
+                ego_pose = list(self.traj_ls.values())[-1]
+                track_info = list(self.tracklets_ls.values())[-1]
             distance_msg = Float64()
             distance_msg.data = ego_pose[0] + track_info[0] - (-msg.pose.pose.position.z)
             print("idx: ", idx)
