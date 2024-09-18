@@ -76,9 +76,7 @@ class GroundTruth(Node):
         self.traj_ls = dict()
 
         for traj_point in traj['frames']:
-            self.traj_ls[traj_point['id']] = [traj_point['ego_pose'][0][3],
-                                              traj_point['ego_pose'][1][3],
-                                              traj_point['ego_pose'][2][3]]
+            self.traj_ls[traj_point['id']] = np.array(traj_point['ego_pose'])
         # print(self.traj_ls)
 
         self.publisher_distance = self.create_publisher(Float64, 'cam_2_cipv', 10)
@@ -91,18 +89,30 @@ class GroundTruth(Node):
         self.subscription  # prevent unused variable warning
 
 
+    def transform_pose(self, ego_pose):
+        Rt = ego_pose[:3, :3]
+        rot_obj = Rotation.from_matrix(Rt)
+        angles = rot_obj.as_euler('xyz')
+        m_angles = -angles
+        m_Rt = Rotation.from_euler('xyz', m_angles.tolist())
+        Trans = np.eye(4)
+        Trans[:3, :3] = m_Rt
+
+        return Trans @ ego_pose
+
+
     def listener_callback(self, msg):
         idx = int(msg.pose.covariance[0])
         if idx % self.sync_iter_times == 0:
             if idx < len(self.traj_ls):
-                ego_pose = self.traj_ls[idx]
+                ego_pose = self.transform_pose(self.traj_ls[idx])
                 track_info_idx = idx // self.sync_iter_times + self.start_frame
                 track_info = self.tracklets_ls[track_info_idx]
             else:
-                ego_pose = list(self.traj_ls.values())[-1]
+                ego_pose = self.transform_pose(list(self.traj_ls.values())[-1])
                 track_info = list(self.tracklets_ls.values())[-1]
             distance_msg = Float64()
-            distance_msg.data = ego_pose[0] + track_info[0] - (-msg.pose.pose.position.z)
+            distance_msg.data = ego_pose[0, 3] + track_info[0] - (-msg.pose.pose.position.z)
             # print("idx: ", idx)
             # print(" cam to cipv: ", distance_msg.data)
             time_stamp = float(msg.header.stamp.sec) + float(msg.header.stamp.nanosec) / 1e9
