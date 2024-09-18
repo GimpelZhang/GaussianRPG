@@ -32,11 +32,13 @@ class GroundTruth(Node):
         self.track_info_path = ''
         self.start_frame = 98
         self.cipv_id = 6
-        if len(sys.argv) < 3:
-            self.get_logger().error('arg: traj_path track_info_path')
+        if len(sys.argv) < 5:
+            self.get_logger().error('arg: traj_path track_info_path start_frame cipv_id')
         else:
             self.traj_file_path = sys.argv[1]
             self.track_info_path = sys.argv[2]
+            self.start_frame = int(sys.argv[3])
+            self.cipv_id = int(sys.argv[4])
 
         try:
             with open(self.traj_file_path, 'r', encoding='utf-8') as file:
