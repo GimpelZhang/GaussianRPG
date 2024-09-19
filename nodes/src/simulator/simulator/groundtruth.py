@@ -95,6 +95,7 @@ class GroundTruth(Node):
         angles = rot_obj.as_euler('xyz')
         m_angles = -angles
         m_Rt = Rotation.from_euler('xyz', m_angles.tolist())
+        m_Rt = m_Rt.as_matrix()
         Trans = np.eye(4)
         Trans[:3, :3] = m_Rt
 

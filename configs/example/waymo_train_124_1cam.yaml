@@ -1,9 +1,10 @@
 task: waymo_full_exp
-source_path: /home/vipuser/nerf/GaussianRPG/data/train/124
+main_workspace: /home/junchuan/nerf/street_gaussians
+source_path: /home/junchuan/nerf/street_gaussians/data/waymo/training/124
 exp_name: waymo_train_124_1cam
-traj_file_path: /home/vipuser/nerf/GaussianRPG/output/waymo_full_exp/waymo_train_124_1cam/trajectory/ours_50000/cams_tape.json
+traj_file_path: /home/junchuan/nerf/street_gaussians/output/waymo_full_exp/waymo_train_124_1cam/trajectory/ours_50000/cams_tape.json
 separate_perception: false
-yolov5_weights_path: /home/vipuser/nerf/GaussianRPG/weights/yolov5s.pt
+yolov5_weights_path: /home/junchuan/nerf/street_gaussians/weights/yolov5s.pt
 
 data:
   split_test: -1

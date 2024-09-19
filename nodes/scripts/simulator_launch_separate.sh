@@ -15,13 +15,13 @@ source $nodes_dir/install/setup.bash
 rviz2 -d $nodes_dir/rviz2/gaussian_rpg.rviz &
 
 # Launch the dummy controller:
-ros2 run dummy_controllers aeb_controller &
+ros2 run dummy_controllers aeb_controller $8 &
 ros2 run dummy_controllers object_detector ../weights/yolov5s.pt &
 
 # Launch the simulator:
-ros2 run simulator evaluation 12.00 2.0 & # args: simulation_time collision_threshold
-ros2 run simulator ground_truth ../output/waymo_full_exp/waymo_train_002_1cam/trajectory/ours_50000/cams_tape.json ../data/waymo/training/002/track/track_info.txt 98 6 &
-ros2 run simulator simulator --config $nerf_dir/configs/example/waymo_train_002_1cam_separate.yaml &
+ros2 run simulator evaluation $6 $7 & # args: simulation_time collision_threshold
+ros2 run simulator ground_truth $1 $2 $3 $4 &
+ros2 run simulator simulator --config $nerf_dir/configs/example/$5 &
 
 sleep 3
 

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import rclpy
 from rclpy.node import Node
 
@@ -21,6 +22,12 @@ class Controller(Node):
 
     def __init__(self):
         super().__init__('aeb_controller')
+        self.brake_distance = 24.0
+        if len(sys.argv) < 2:
+            self.get_logger().error('arg: brake_distance')
+        else:
+            self.brake_distance = float(sys.argv[1])
+
         self.publisher_command = self.create_publisher(TwistStamped, 'control_cmd', 10)
 
         self.subscription_perception = self.create_subscription(
@@ -65,7 +72,7 @@ class Controller(Node):
         command_msg.twist.angular.y = 0.0
         command_msg.twist.angular.z = 0.0
 
-        if self.cipv_lon_dist < 24:
+        if self.cipv_lon_dist < self.brake_distance:
             if self.lon_velocity > 2:
                 command_msg.twist.linear.x = -13.5  # m/s^2
             elif self.lon_velocity > 1:

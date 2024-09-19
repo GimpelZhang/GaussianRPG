@@ -137,7 +137,7 @@ def render_trajectory():
     # cfg.render.save_image = False
     # cfg.render.save_video = True
 
-    cfg.render.save_image = False
+    cfg.render.save_image = True
     cfg.render.save_video = False
     
     with torch.no_grad():

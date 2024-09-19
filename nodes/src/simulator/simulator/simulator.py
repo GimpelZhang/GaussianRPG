@@ -231,9 +231,10 @@ class MainFrame(Node):
                 # cam_trans = copy.deepcopy(self.last_pose_dict['position'])
                 cam_rot = self.last_pose_dict['rotation_matrix']
                 cam_trans = self.last_pose_dict['position']
-                Rt = np.array(cam_rot).transpose()
+                # Rt = np.array(cam_rot).transpose()
                 # for cam: -z;
-                cam_direction_vector = -Rt[:, 0]
+                # cam_direction_vector = -Rt[:, 0]
+                cam_direction_vector = np.array([0.0, 0.0, -1.0])
 
                 # update cam position
                 update_cam = np.array(cam_trans)
@@ -358,7 +359,7 @@ class MainFrame(Node):
                 gn = torch.tensor((self.H, self.W))[[1, 0, 1, 0]]  # normalization gain whwh
 
                 # # yolov5 detection results saved for debugging:
-                # save_path = '/home/junchuan/nerf/street_gaussians/' + '000%s_0' % self.cam_sample.meta['frame'] + '.jpg'
+                # save_path = '/home/junchuan/nerf/gaussian_rpg/' + '000%s_0' % self.cam_sample.meta['frame'] + '.jpg'
 
                 if len(det):
                     # Rescale boxes from img_size to im0 size
