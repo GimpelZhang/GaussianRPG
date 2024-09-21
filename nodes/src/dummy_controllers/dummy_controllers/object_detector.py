@@ -14,24 +14,17 @@
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Float64
 import sys
 import os
 from sensor_msgs.msg import Image as ROS2_Image
-from geometry_msgs.msg import PoseWithCovarianceStamped, TwistStamped, PoseArray, Pose
+from geometry_msgs.msg import PoseArray, Pose
 from cv_bridge import CvBridge, CvBridgeError
 
 nerf_path = '../'
 if nerf_path not in sys.path:
     sys.path.append(nerf_path)
 
-from scipy.spatial.transform import Rotation
-import numpy as np
-
-import argparse
-import torch.backends.cudnn as cudnn
 from models.experimental import attempt_load
-from utils.dataloaders import LoadStreams, LoadImages
 from utils.general import *
 from utils.plots import *
 from utils.torch_utils import *

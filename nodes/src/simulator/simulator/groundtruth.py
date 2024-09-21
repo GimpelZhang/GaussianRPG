@@ -30,8 +30,8 @@ class GroundTruth(Node):
         super().__init__('ground_truth')
         self.traj_file_path = ''
         self.track_info_path = ''
-        self.start_frame = 98
-        self.cipv_id = 6
+        self.start_frame = 98  # start frame id of the scene
+        self.cipv_id = 6  # the cipv id in the track_info.txt
         if len(sys.argv) < 5:
             self.get_logger().error('arg: traj_path track_info_path start_frame cipv_id')
         else:
@@ -70,7 +70,7 @@ class GroundTruth(Node):
             if int(tracklet[0]) >= self.start_frame:
                 if int(tracklet[1]) == self.cipv_id:
                     frame_id = int(tracklet[0])
-                    self.tracklets_ls[frame_id] = [float(t) for t in tracklet[7:10]]
+                    self.tracklets_ls[frame_id] = [float(t) for t in tracklet[7:10]] # xyz
         # print(self.tracklets_ls)
 
         self.traj_ls = dict()
@@ -90,6 +90,7 @@ class GroundTruth(Node):
 
 
     def transform_pose(self, ego_pose):
+        # ego_pose is transformed. After that all ego cars move in x direction
         Rt = ego_pose[:3, :3]
         rot_obj = Rotation.from_matrix(Rt)
         angles = rot_obj.as_euler('xyz')
@@ -113,6 +114,9 @@ class GroundTruth(Node):
                 ego_pose = self.transform_pose(list(self.traj_ls.values())[-1])
                 track_info = list(self.tracklets_ls.values())[-1]
             distance_msg = Float64()
+            # After transforming, all ego cars move in x direction
+            # so distance = (ego pose in world coord) + (cipv pose in ego coord) - (cam pose in world coord)
+            # of course only one direction is considered in the following line:
             distance_msg.data = ego_pose[0, 3] + track_info[0] - (-msg.pose.pose.position.z)
             # print("idx: ", idx)
             # print(" cam to cipv: ", distance_msg.data)

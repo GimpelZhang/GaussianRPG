@@ -16,13 +16,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Float64
 import sys
-import os
-import json
 
-from geometry_msgs.msg import PoseWithCovarianceStamped, TwistStamped
-
-from scipy.spatial.transform import Rotation
-import numpy as np
+from geometry_msgs.msg import PoseWithCovarianceStamped
 
 class Evaluation(Node):
 

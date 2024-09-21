@@ -26,11 +26,7 @@ nerf_path = '../'
 if nerf_path not in sys.path:
     sys.path.append(nerf_path)
 
-# sys.path.append('/home/junchuan/miniconda3/envs/street-gaussian/lib/python3.8/site-packages')
-#
-import torch
 import json
-from tqdm import tqdm
 import numpy as np
 from lib.models.street_gaussian_model import StreetGaussianModel
 from lib.models.street_gaussian_renderer import StreetGaussianRenderer, StreetGaussianRendererLite
@@ -67,7 +63,7 @@ class MainFrame(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.timer_period = 0.02
+        self.timer_period = 0.02  # the simulator runs at 50Hz, a higher freq base.
         self.frame_timer = self.create_timer(self.timer_period, self.next_frame)
 
         self.last_pose_dict = {"position": [0.0, 0.0, 0.0]}
@@ -122,6 +118,7 @@ class MainFrame(Node):
             # self.visualizer.summarize()
 
             if not self.separate_perception:
+                # prepare for the yolov5 perception module:
                 self.publisher_objects = self.create_publisher(PoseArray, 'objects', 10)
                 self.weights = cfg.yolov5_weights_path
                 self.conf_thres = 0.25  # confidence threshold
@@ -133,9 +130,11 @@ class MainFrame(Node):
                 self.augment = False  # augmented inference
                 extr = np.array(
                     [[0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
-                extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3]) # ego to cipv
-                self.cam_height = float(self.cam_sample.extrinsic[2, 3])
+                # x dir position of cam: make the perception result ego to cipv
+                extr[2, 3] = -float(self.cam_sample.extrinsic[0, 3])
+                self.cam_height = float(self.cam_sample.extrinsic[2, 3]) # z dir position of cam
                 # extr[2, 3] = -1.544414504251094167
+                # Here we use 1600/2 and 1066/2 in the intrinsics to compute the yolo result:
                 intr = np.array(
                     [[2.083091212133253975e+03, 0.0, 800.0], [0.0, 2.083091212133253975e+03, 533], [0.0, 0.0, 1.0]])
                 self.extrinsics = extr
@@ -215,6 +214,7 @@ class MainFrame(Node):
 
     def next_frame(self):
         if not self.sync_lock:
+            # if no controller activated in loop: cam poses come from the "cams_tape.json" traj record file:
             if self.idx < self.traj_length:
                 pose = self.traj['frames'][self.idx]
                 self.timestamp = pose['timestamp']
@@ -222,6 +222,7 @@ class MainFrame(Node):
                 pose = self.traj['frames'][-1]
                 self.timestamp = pose['timestamp'] + (self.idx - self.traj_length + 1) * self.timer_period
 
+            # simple "car dynamics" part:
             if self.controller_activated:
                 velocity_step = self.forward_velocity + self.command_brake * self.timer_period
                 if velocity_step < 0:
@@ -231,9 +232,7 @@ class MainFrame(Node):
                 # cam_trans = copy.deepcopy(self.last_pose_dict['position'])
                 cam_rot = self.last_pose_dict['rotation_matrix']
                 cam_trans = self.last_pose_dict['position']
-                # Rt = np.array(cam_rot).transpose()
-                # for cam: -z;
-                # cam_direction_vector = -Rt[:, 0]
+                # Plenty of simplication here: the velocity is only linked on one direction (-z direction) of cam motion
                 cam_direction_vector = np.array([0.0, 0.0, -1.0])
 
                 # update cam position
@@ -295,6 +294,7 @@ class MainFrame(Node):
                     image_name=self.cam_orig.image_name,
                     metadata=self.cam_orig.meta
                 )
+                # trick part: we inherit the ego_pose from the original traj to "push forward" the other cars in the scene
                 ego_pose = torch.from_numpy(np.array(pose['ego_pose'])).float()
                 cam_sample.ego_pose = ego_pose.cuda(0)
                 cam_sample.extrinsic = self.cam_orig.extrinsic
@@ -323,12 +323,14 @@ class MainFrame(Node):
             msg.width = rgb_result.shape[1]
             msg.encoding = 'rgb8'
             msg.step = msg.width * 3
+            # this is the most time consuming command:
             msg.data = rgb_result.reshape(1, msg.height * msg.step).astype(int).tolist()[0]
             self.publisher_image.publish(msg)
 
             # end_time = time.perf_counter()
             # print(f"2执行时间：{end_time - start_time} 秒")
         else:
+            # the yolov5 perception module begins:
             rgb = letterbox(rgb_result, self.imgsz, stride=self.stride, auto=True)[0]  # padded resize
             rgb = rgb.transpose((2, 0, 1))[::-1]
             rgb = np.ascontiguousarray(rgb)  # contiguous

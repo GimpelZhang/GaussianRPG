@@ -49,7 +49,7 @@ def camera_to_tape(id, camera: Camera):
     }
     return camera_pose
 
-def tape_upsampling(cams_pose_list):
+def tape_upsampling(cams_pose_list, rate):
     upsampling = []
     idx = 0
     for i in range(len(cams_pose_list) - 1):
@@ -59,14 +59,14 @@ def tape_upsampling(cams_pose_list):
         upsampling.append(current)
         idx = idx+1
 
-        diff = [(b - a) / 5 for a, b in zip(current['position'], next_point['position'])]
-        time_diff = (next_point['timestamp'] - current['timestamp'])/5
-        diff_ego_x = (next_point['ego_pose'][0][3] - current['ego_pose'][0][3])/5
-        diff_ego_y = (next_point['ego_pose'][1][3] - current['ego_pose'][1][3])/5
-        diff_ego_z = (next_point['ego_pose'][2][3] - current['ego_pose'][2][3])/5
+        diff = [(b - a) / rate for a, b in zip(current['position'], next_point['position'])]
+        time_diff = (next_point['timestamp'] - current['timestamp'])/rate
+        diff_ego_x = (next_point['ego_pose'][0][3] - current['ego_pose'][0][3])/rate
+        diff_ego_y = (next_point['ego_pose'][1][3] - current['ego_pose'][1][3])/rate
+        diff_ego_z = (next_point['ego_pose'][2][3] - current['ego_pose'][2][3])/rate
         print(diff_ego_x, diff_ego_y,diff_ego_z)
         # upsampling from 10hz to 50hz:
-        for j in range(1, 5):
+        for j in range(1, rate):
             new_pos = [current['position'][k] + j * diff[k] for k in range(3)]
             new_timestamp = current['timestamp'] + j * time_diff
             new_id = idx
@@ -178,7 +178,8 @@ def render_trajectory():
                 # x = 0.5  # 举例
                 x = 0.0  # 举例
                 # 从 T1 的旋转矩阵中提取前进方向的单位向量，这里是 z 轴负方向
-                direction_vector = -Rt[:, 0]  # 假设物体沿 z 轴负方向前进
+                # direction_vector = -Rt[:, 0]  # 假设物体沿 z 轴负方向前进
+                direction_vector = np.array([0.0, 0.0, -1.0])
 
                 # 计算前进向量
                 delta_p = x * direction_vector
@@ -225,14 +226,15 @@ def render_trajectory():
             json_cams.append(_cam)
             cams_tape_orig.append(camera_to_tape(idx, cam_sample))
 
-        json_cams_output_before = {"frames": json_cams_before}
-        with open(os.path.join(visualizer.result_dir, "cameras_before.json"), 'w') as file:
-            json.dump(json_cams_output_before, file)
-        json_cams_output = {"frames": json_cams}
-        with open(os.path.join(visualizer.result_dir, "cameras.json"), 'w') as file:
-            json.dump(json_cams_output, file)
+        # json_cams_output_before = {"frames": json_cams_before}
+        # with open(os.path.join(visualizer.result_dir, "cameras_before.json"), 'w') as file:
+        #     json.dump(json_cams_output_before, file)
+        # json_cams_output = {"frames": json_cams}
+        # with open(os.path.join(visualizer.result_dir, "cameras.json"), 'w') as file:
+        #     json.dump(json_cams_output, file)
 
-        cams_tape = tape_upsampling(cams_tape_orig)
+        # upsampling the camera poses for closed-loop simulation:
+        cams_tape = tape_upsampling(cams_tape_orig, 5)
         cams_tape_output = {"frames": cams_tape}
         cams_tape_output["image_freq"] = 10
         cams_tape_output["dynamic_freq"] = 50

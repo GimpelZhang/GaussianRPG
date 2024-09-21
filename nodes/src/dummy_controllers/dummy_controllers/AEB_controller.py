@@ -22,7 +22,7 @@ class Controller(Node):
 
     def __init__(self):
         super().__init__('aeb_controller')
-        self.brake_distance = 24.0
+        self.brake_distance = 24.0  # distance to start braking
         if len(sys.argv) < 2:
             self.get_logger().error('arg: brake_distance')
         else:
@@ -97,7 +97,6 @@ class Controller(Node):
             self.last_pose_msg = msg
 
     def final_call(self):
-        # self.visualizer.summarize()
         pass
 
 def main(args=None):
