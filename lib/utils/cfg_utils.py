@@ -33,7 +33,7 @@ def parse_cfg(cfg, args):
 
     # model directory
     if cfg.model_path == '':
-        cfg.model_path = os.path.join('/home/junchuan/nerf/street_gaussians/output', cfg.task, cfg.exp_name)
+        cfg.model_path = os.path.join(cfg.main_workspace, 'output', cfg.task, cfg.exp_name)
     
     if not os.path.isabs(cfg.model_path):
         cfg.model_path = os.path.join(cfg.workspace, cfg.model_path)

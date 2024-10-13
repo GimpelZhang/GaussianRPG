@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import rclpy
 from rclpy.node import Node
 
@@ -21,6 +22,12 @@ class Controller(Node):
 
     def __init__(self):
         super().__init__('aeb_controller')
+        self.brake_distance = 24.0  # distance to start braking
+        if len(sys.argv) < 2:
+            self.get_logger().error('arg: brake_distance')
+        else:
+            self.brake_distance = float(sys.argv[1])
+
         self.publisher_command = self.create_publisher(TwistStamped, 'control_cmd', 10)
 
         self.subscription_perception = self.create_subscription(
@@ -51,7 +58,10 @@ class Controller(Node):
         if len(cipv_candidate)>0:
             self.cipv_lon_dist = min(cipv_candidate)
 
-        print("cipv: ", self.cipv_lon_dist)
+        # print("cipv: ", self.cipv_lon_dist)
+        time_stamp = float(msg.header.stamp.sec) + float(msg.header.stamp.nanosec) / 1e9
+        self.get_logger().info('timestamp: "%s"' % time_stamp)
+        self.get_logger().info('cipv: "%s"' % self.cipv_lon_dist)
 
         command_msg = TwistStamped()
         command_msg.header = msg.header
@@ -62,7 +72,7 @@ class Controller(Node):
         command_msg.twist.angular.y = 0.0
         command_msg.twist.angular.z = 0.0
 
-        if self.cipv_lon_dist < 24:
+        if self.cipv_lon_dist < self.brake_distance:
             if self.lon_velocity > 2:
                 command_msg.twist.linear.x = -13.5  # m/s^2
             elif self.lon_velocity > 1:
@@ -72,7 +82,8 @@ class Controller(Node):
             else:
                 command_msg.twist.linear.x = 0.0
 
-        print("command: ", command_msg.twist.linear.x)
+        # print("command: ", command_msg.twist.linear.x)
+        self.get_logger().info('command output: "%s"' % command_msg.twist.linear.x)
         self.publisher_command.publish(command_msg)
 
 
@@ -86,7 +97,6 @@ class Controller(Node):
             self.last_pose_msg = msg
 
     def final_call(self):
-        # self.visualizer.summarize()
         pass
 
 def main(args=None):
