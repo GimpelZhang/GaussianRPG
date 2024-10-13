@@ -14,24 +14,15 @@ In this project, a simulator has been developed. Street_Gaussians is responsible
 
 Waymo Scene 002:
 
-<video controls>
-  <source src="https://github.com/GimpelZhang/GaussianRPG/blob/main/images/scene_waymo_002.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![scene_002](images/scene_waymo_002.gif)
 
 Waymo Scene 124:
 
-<video controls>
-  <source src="https://github.com/GimpelZhang/GaussianRPG/blob/main/images/scene_waymo_124.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![scene_124](images/scene_waymo_124.gif)
 
 Waymo Scene 149: 
 
-<video controls>
-  <source src="https://github.com/GimpelZhang/GaussianRPG/blob/main/images/scene_waymo_149.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![scene_149](images/scene_waymo_149.gif)
 
 ### Installation
 
