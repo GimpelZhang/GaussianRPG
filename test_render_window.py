@@ -78,14 +78,18 @@ def render_trajectory():
 
     app = QApplication(sys.argv)
     window = QWidget()
-    # window.setWindowFlags(QtCore.Qt.FramelessWindowHint)  # Remove title bar and toolbar
+    window.setWindowFlags(QtCore.Qt.FramelessWindowHint)  # Remove title bar and toolbar
     # Set the window size, for example, 800x600
 
-    window.showFullScreen()  # Show in full screen
+    # window.showFullScreen()  # Show in full screen
+    # window.show()
     window.resize(1600, 1066)
+    window.move(1920, 0)  # can send the pic to the next screen (which goes into the rdk)
 
     label = QLabel(window)
-    label.setGeometry(2100, 0, window.width(), window.height())  # Set label size to window size
+    label.setGeometry(0, 0, window.width(), window.height())  # Set label size to window size
+
+    window.show()
     
     with torch.no_grad():
         dataset = Dataset()        
@@ -180,17 +184,23 @@ def render_trajectory():
             app.processEvents()  # Update the GUI
             end_time = time.perf_counter()
             print(f" running time：{end_time - start_time}秒")
-
+        # sys.exit(app.exec_())
             # visualizer.visualize(result, cam_sample)
 
             
 if __name__ == "__main__":
     print("Rendering " + cfg.model_path)
     safe_state(cfg.eval.quiet)
-    
-    if cfg.mode == 'evaluate':
-        render_sets()
-    elif cfg.mode == 'trajectory':
-        render_trajectory()
-    else:
-        raise NotImplementedError()
+
+    try:
+        if cfg.mode == 'evaluate':
+            render_sets()
+        elif cfg.mode == 'trajectory':
+            render_trajectory()
+        else:
+            raise NotImplementedError()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        import traceback
+
+        traceback.print_exc()
