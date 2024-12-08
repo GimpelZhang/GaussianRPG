@@ -1,5 +1,5 @@
 import torch 
-import os,sys
+import os
 import json
 from tqdm import tqdm
 import numpy as np
@@ -15,12 +15,10 @@ import time
 import copy
 from lib.utils.camera_utils import Camera
 from scipy.spatial.transform import Rotation
+import cv2
 import tkinter as tk
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5 import QtCore
 
 def render_sets():
     cfg.render.save_image = True
@@ -76,16 +74,28 @@ def render_trajectory():
     cfg.render.save_image = True
     cfg.render.save_video = False
 
-    app = QApplication(sys.argv)
-    window = QWidget()
-    # window.setWindowFlags(QtCore.Qt.FramelessWindowHint)  # Remove title bar and toolbar
-    # Set the window size, for example, 800x600
+    # # 创建Tkinter窗口
+    # root = tk.Tk()
+    # root.title("Image Display")
+    #
+    # # 设置窗口大小和位置
+    # window_width, window_height = 1600, 1066
+    # position_x, position_y = 100, 100  # 根据需要调整位置
+    # root.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
 
-    window.showFullScreen()  # Show in full screen
-    window.resize(1600, 1066)
+    # 设置窗口名称
+    window_name = 'Image Display'
+    cv2.namedWindow(window_name, cv2.WINDOW_GUI_NORMAL)  # 创建一个可调整大小的窗口
 
-    label = QLabel(window)
-    label.setGeometry(2100, 0, window.width(), window.height())  # Set label size to window size
+    # cv2.setWindowProperty(window_name, cv2.WND_PROP_AUTOSIZE, cv2.WINDOW_AUTOSIZE)
+
+    # 设置窗口位置和大小
+    # 注意：OpenCV不直接支持设置窗口位置，但可以通过调整窗口属性来间接实现
+    cv2.moveWindow(window_name, 10, 10)  # 将窗口移动到屏幕上的(100,100)位置
+    # cv2.resizeWindow(window_name, 1600, 1066)  # 设置窗口大小为1600x1066
+    # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_AUTOSIZE, cv2.WINDOW_AUTOSIZE)
     
     with torch.no_grad():
         dataset = Dataset()        
@@ -167,20 +177,16 @@ def render_trajectory():
             result = renderer.render_all(cam_sample, gaussians)['rgb']
             rgb = (result.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
 
-            # Convert numpy array to QImage
-            height, width, channel = rgb.shape
-            print(height)
-            print(width)
-            bytes_per_line = 3 * width
-            q_image = QImage(rgb.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(q_image)
-            label.setPixmap(pixmap)
-            label.show()
+            # 显示图片
+            image_bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+            cv2.imshow(window_name, image_bgr)
 
-            app.processEvents()  # Update the GUI
+            # 按任意键继续，或者等待1ms
+            cv2.waitKey(1)
             end_time = time.perf_counter()
             print(f" running time：{end_time - start_time}秒")
-
+        # 销毁所有窗口
+        cv2.destroyAllWindows()
             # visualizer.visualize(result, cam_sample)
 
             
