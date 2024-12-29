@@ -14,8 +14,8 @@
 
 import rclpy
 from rclpy.node import Node
-import sys, signal
-import os, cv2
+import sys, signal, random
+import os, cv2, math
 from sensor_msgs.msg import Image as ROS2_Image
 from geometry_msgs.msg import PoseArray, Pose
 from cv_bridge import CvBridge, CvBridgeError
@@ -102,6 +102,8 @@ class ObjectDetector(Node):
         #     return
         # else:
         #     self.weights = sys.argv[1]
+
+        self.item_id = 0
 
         self.publisher_objects = self.create_publisher(PoseArray, 'objects', 10)
 
@@ -219,9 +221,19 @@ class ObjectDetector(Node):
     def find_first_usb_camera(self):
         video_devices = [os.path.join('/dev', dev) for dev in os.listdir('/dev') if dev.startswith('video')]
         for dev in video_devices:
-            if is_usb_camera(dev):
+            if self.is_usb_camera(dev):
                 return dev
         return None
+
+
+    def plot_one_box(self, x, img, color=None, label=None, line_thickness=None):
+        # Plots one bounding box on image img
+        tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
+        color = color or [random.randint(0, 255) for _ in range(3)]
+        c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
+        cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
+        cv2.putText(img, label, c1, cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0), 2)
+        print("左上点的坐标为：(" + str(c1[0]) + "," + str(c1[1]) + ")，右下点的坐标为(" + str(c2[0]) + "," + str(c2[1]) + ")")
 
 
     def object_point_world_position(self, u, v, w, h, p, k):
@@ -265,7 +277,7 @@ class ObjectDetector(Node):
         k = self.intrinsics
         if len(bbox):
             obj_position = []
-            u, v, w, h = bbox[0] * self.W, bbox[1] * self.H, bbox[2] * self.W, bbox[3] * self.H
+            u, v, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
             # print('目标框', u, v, w, h)
             d1 = self.object_point_world_position(u, v, w, h, p, k)
         distance = 0
@@ -294,6 +306,8 @@ class ObjectDetector(Node):
         # img_file = cv2.imread('./kite.jpg')
         resized_data = cv2.resize(img_file, self.des_dim, interpolation=cv2.INTER_AREA)
         nv12_data = self.bgr2nv12_opencv(resized_data)
+        # yolov5 detection results saved for debugging:
+        rgb_result = img_file.copy()
         t0 = time.time()
         outputs = self.models[0].forward(nv12_data)
         t1 = time.time()
@@ -322,34 +336,57 @@ class ObjectDetector(Node):
         # 解析JSON字符串  
         data = json.loads(result_str[16:])  
 
-        # 遍历每一个结果  
-        for result in data:  
-            bbox = result['bbox']  # 矩形框位置信息  
-            score = result['score']  # 得分  
-            id = result['id']  # id  
-            name = result['name']  # 类别名称  
-        
-            # 打印信息  
-            print(f"bbox: {bbox}, score: {score}, id: {id}, name: {name}")
+        if len(data) > 0:
+            print(self.item_id)
+            # yolov5 detection results saved for debugging:
+            save_path = '/home/sunrise/ros2_ws/nodes/' + '000%s_0' % self.item_id + '.jpg'
+            self.item_id += 1
 
-            if not name in ['person', 'chair', 'car', 'truck', 'bicycle', 'motorcycle','bus','traffic light', 'stop sign']:
-                continue
+            # 遍历每一个结果  
+            for result in data:  
+                bbox = result['bbox']  # 矩形框位置信息  
+                score = result['score']  # 得分  
+                id = result['id']  # id  
+                name = result['name']  # 类别名称  
+            
+                # 打印信息  
+                print(f"bbox: {bbox}, score: {score}, id: {id}, name: {name}")
 
-            if float(score) < 0.3:
-                continue
+                if not name in ['person', 'chair', 'car', 'truck', 'bicycle', 'motorcycle','bus','traffic light', 'stop sign']:
+                    continue
 
-            distance, d = self.distance(bbox)
-            if d[0] != 0 or d[1] != 0:
-                object_pose = Pose()
-                object_pose.position.x = d[0]
-                object_pose.position.y = d[1]
-                object_pose.position.z = 0.0
-                object_pose.orientation.x = 0.0
-                object_pose.orientation.y = 0.0
-                object_pose.orientation.z = 0.0
-                object_pose.orientation.w = 1.0
-                detection_msg.poses.append(object_pose)
+                if float(score) < 0.3:
+                    continue
 
+                xywh = np.zeros(4)
+                xywh[0] = (bbox[0] + bbox[2]) / 2.0
+                xywh[1] = (bbox[1] + bbox[3]) / 2.0
+                xywh[2] = bbox[2] - bbox[0]
+                xywh[3] = bbox[3] - bbox[1]
+
+                distance, d = self.distance(xywh)
+                if d[0] != 0 or d[1] != 0:
+                    object_pose = Pose()
+                    object_pose.position.x = d[0]
+                    object_pose.position.y = d[1]
+                    object_pose.position.z = 0.0
+                    object_pose.orientation.x = 0.0
+                    object_pose.orientation.y = 0.0
+                    object_pose.orientation.z = 0.0
+                    object_pose.orientation.w = 1.0
+                    detection_msg.poses.append(object_pose)
+                
+                # yolov5 detection results saved for debugging:
+                hide_labels = False
+                line_thickness = 3
+                label = None if hide_labels else name
+                if label != None and distance != 0:
+                    label = label + ' ' + str('%.1f' % d[0]) + 'm' + str('%.1f' % d[1]) + 'm'
+                
+                self.plot_one_box(bbox, rgb_result, label=label, line_thickness=line_thickness)
+
+            # yolov5 detection results saved for debugging:
+            cv2.imwrite(save_path, rgb_result)
         self.publisher_objects.publish(detection_msg)
 
 
