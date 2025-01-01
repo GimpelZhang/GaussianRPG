@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'simulator = simulator.simulator:main',
+            'simulator_hil = simulator.simulator_hil.main',
             'ground_truth = simulator.groundtruth:main',
             'evaluation = simulator.evaluation:main'
         ],
